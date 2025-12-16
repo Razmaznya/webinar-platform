@@ -1,4 +1,4 @@
-name: Build and Check
+name: Build and Deploy
 
 on:
   push:
@@ -40,3 +40,30 @@ jobs:
         run: npm ci
       - name: Check server syntax (optional)
         run: node --check server.js
+
+  # 👇 НОВЫЙ JOB ДЛЯ ПУБЛИКАЦИИ НА GITHUB PAGES
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.ref == 'refs/heads/main'  # Только при пуше в main
+    needs: test-frontend  # Ждём успешного теста фронтенда
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './frontend'  # ⚠️ Публикуем ВЕСЬ контент из frontend/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
