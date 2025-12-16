@@ -7,19 +7,36 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  test-frontend:
+    name: Test Frontend
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./frontend
     steps:
       - uses: actions/checkout@v4
-
-      - name: Use Node.js 18
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm ci
+      - name: Build frontend (optional)
+        run: npm run build --if-present
 
-      - name: Show project structure
-        run: ls -la
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install backend dependencies
+        run: npm ci
+      - name: Check server syntax (optional)
+        run: node --check server.js
